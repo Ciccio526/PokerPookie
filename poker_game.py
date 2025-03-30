@@ -1,3 +1,5 @@
+from logging import warning
+from re import X
 from pokerkit import Deck, Poker, State
 import pygame
 import sys
@@ -57,11 +59,9 @@ def fold_onClick():
 
 def call_onClick():
     h_player.set_action("call")
-    game_manager.next_turn()
 
 def raise_onClick():
     h_player.set_action("raise", 5)
-    game_manager.next_turn()
     
 def help_onClick():
     webbrowser.open("http://pokerpookie.tech/")
@@ -143,6 +143,16 @@ def display_player_cards(screen):
 
     pygame.display.flip()
 
+def display_AI_cards(screen, x, y, AI_Player_hand):
+    START_X = x
+    for card in AI_Player_hand:
+        card_key = f"{card.rank}{card.suit}"
+        card_image = card_images[card_key]
+        screen.blit(card_image, (START_X, y))
+        START_X += 115
+    pygame.display.flip()
+
+
 
 #init logic
 pygame.init()
@@ -171,22 +181,34 @@ def run_poker_game(shared_queue):
         emotion_data = read_emotion_data(shared_queue)
         detected_emotion = emotion_data["emotion"]
         emotion_confidence = emotion_data["confidence"]
+        warning_message = ""
+
+        if(detected_emotion == "happy"):
+            warning_message = "You are smiling"
+        elif(detected_emotion == "surprise"):
+            warning_message = "You look surprised"
+        elif(detected_emotion == "fear"):
+            warning_message = "You look scared"
+        elif(detected_emotion == "anger"):
+            warning_message = "You look angry"
+
 
         font = pygame.font.Font(None, 36)
-        emotion_text = font.render(f"Emotion: {detected_emotion}", True, (255,255,255))
-        confidence_text = font.render(f"Confidence: {emotion_confidence:.2f}", True, (255,255,255))
-        current_pot_amount_text = font.render(f"Current pot value: {game_manager.current_pot}", True, (255, 255, 255))
-        current_bet_amount_text = font.render(f"Current bet amount: {game_manager.current_bet}", True, (255, 255, 255))
+        emotion_text = font.render(f"{warning_message}", True, (255,255,255))
+        
+        current_pot_amount_text = font.render(f"Current pot value: ${game_manager.current_pot}", True, (255, 255, 255))
+        current_bet_amount_text = font.render(f"Current bet amount: ${game_manager.current_bet}", True, (255, 255, 255))
         current_player_text = font.render(f"Current player: {game_manager.current_player.name}", True, (255,255,255))
+        current_coins_text = font.render(f"Current chips: {h_player.chips}", True, (255,255,255))
 
         display_community_cards(screen, game_manager.bFlop, game_manager.bFourth_flip, game_manager.bFifth_flip)
         display_player_cards(screen)
 
         screen.blit(emotion_text, (50,50))
-        screen.blit(confidence_text, (50,10))
         screen.blit(current_bet_amount_text, (195, 460))
         screen.blit(current_pot_amount_text, (195, 480))
         screen.blit(current_player_text, (195, 500))
+        screen.blit(current_coins_text, (1100,670))
 
         pygame.display.flip()
 
@@ -202,6 +224,10 @@ def run_poker_game(shared_queue):
                     game_manager.current_bet += game_manager.current_player.raise_amount
                     game_manager.raise_player_dict[game_manager.current_player.name] = True
                 elif(AI_Decision == "call"):
+                    if(game_manager.current_round == "preflop"):
+                        game_manager.current_player.chips -= 1
+                        game_manager.current_pot += 1
+
                     game_manager.current_pot += game_manager.current_bet
                     game_manager.current_player.chips -= game_manager.current_bet
                     game_manager.raise_player_dict[game_manager.current_player.name] = False
@@ -216,6 +242,20 @@ def run_poker_game(shared_queue):
         if(game_manager.winner):
             win_text = font.render(f"Winner; {game_manager.winner}", True, (255,255,255))
             screen.blit(win_text, (195, 600))
+
+            display_AI_cards(screen, 30, 240, game_manager.players[1].hand)
+            AI_one_name = font.render(f"{game_manager.players[1].name}", True, (255,255,255))
+            screen.blit(AI_one_name, (30, 400))
+
+            display_AI_cards(screen, 500, 30, game_manager.players[2].hand)
+            AI_two_name = font.render(f"{game_manager.players[2].name}", True, (255,255,255))
+            screen.blit(AI_two_name, (500, 190))
+
+            display_AI_cards(screen, 1060, 240, game_manager.players[3].hand)
+            AI_three_name = font.render(f"{game_manager.players[3].name}", True, (255,255,255))
+            screen.blit(AI_three_name, (1060, 400))
+
+            pygame.display.flip()
             time.sleep(60)
             
 
@@ -233,16 +273,39 @@ def run_poker_game(shared_queue):
                         lose_text = font.render(f"Loser", True, (255,255,255))
                         screen.blit(lose_text, (195, 600))
                         pygame.display.flip()
+
+                        display_AI_cards(screen, 30, 240, game_manager.players[1].hand)
+                        AI_one_name = font.render(f"{game_manager.players[1].name}", True, (255,255,255))
+                        screen.blit(AI_one_name, (30, 400))
+
+                        display_AI_cards(screen, 500, 30, game_manager.players[2].hand)
+                        AI_two_name = font.render(f"{game_manager.players[2].name}", True, (255,255,255))
+                        screen.blit(AI_two_name, (500, 190))
+
+                        display_AI_cards(screen, 1060, 240, game_manager.players[3].hand)
+                        AI_three_name = font.render(f"{game_manager.players[3].name}", True, (255,255,255))
+                        screen.blit(AI_three_name, (1060, 400))
+
+                        display_community_cards(screen, True, True, True)
+
+                        pygame.display.flip()
                         time.sleep(60)
                     elif button_list["Call"].collidepoint(mouse_pos):
                         call_onClick()
+
+                        if(game_manager.current_round == "preflop"):
+                            game_manager.current_pot += 1
+                            game_manager.current_player.chips -= 1
+
                         game_manager.current_pot += game_manager.current_bet
                         game_manager.raise_player_dict[game_manager.current_player.name] = False
+                        game_manager.next_turn()
                     elif button_list["Raise"].collidepoint(mouse_pos):
                         raise_onClick()
                         game_manager.current_bet += h_player.raise_amount
                         game_manager.current_pot += game_manager.current_bet
-                        game_manager.raise_player_dict[game_manager.current_player.name] = True
+                        game_manager.raise_player_dict[game_manager.current_player] = True
+                        game_manager.next_turn()
                 else:
                      print("not your turn")
                      continue

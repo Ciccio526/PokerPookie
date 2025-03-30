@@ -16,13 +16,13 @@ class OpponentPlayer():
             self.selected_action = "raise"
         elif confidence > 0.55:  
             print ("Decent hand. Consider a small bet or check.")
-            if(random.random() < .75):
+            if(random.random() < .05):
                 self.selected_action = "raise"
             else:
                 self.selected_action = "call"
         elif confidence > 0.35:  
             print ("You have a good draw. Consider calling.")
-            if(random.random() < .25):
+            if(random.random() < .05):
                 self.selected_action = "raise"
             else:
                 self.selected_action = "call"

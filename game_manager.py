@@ -16,7 +16,7 @@ class GameManager:
         self.current_pot = 0
         self.current_bet = 0
         self.winner = ""
-        self.raise_player_dict = {}
+        self.raise_player_dict = {player: False for player in self.players}
 
     #move to PLAYER next turn
     def next_turn(self):
