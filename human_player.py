@@ -2,7 +2,7 @@ class HumanPlayer():
     def __init__(self, name="You"):
         super().__init__()
         self.name = name 
-        self.chips = 1000
+        self.chips = 100
         self.hand = []
         self.folded = False
         self.selected_action = None

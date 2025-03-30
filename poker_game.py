@@ -208,7 +208,7 @@ def run_poker_game(shared_queue):
         screen.blit(current_bet_amount_text, (195, 460))
         screen.blit(current_pot_amount_text, (195, 480))
         screen.blit(current_player_text, (195, 500))
-        screen.blit(current_coins_text, (1100,670))
+        screen.blit(current_coins_text, (195,520))
 
         pygame.display.flip()
 
