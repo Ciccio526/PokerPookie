@@ -152,7 +152,21 @@ def display_AI_cards(screen, x, y, AI_Player_hand):
         START_X += 115
     pygame.display.flip()
 
+def win_condition(screen):
+    font = pygame.font.Font(None, 25)
+    if(game_manager.players[1]):
+            display_AI_cards(screen, 30, 240, game_manager.players[1].hand)
+            AI_one_name = font.render(f"{game_manager.players[1].name}", True, (255,255,255))
+            screen.blit(AI_one_name, (30, 400))
+    if(game_manager.players[2]):
+        display_AI_cards(screen, 500, 30, game_manager.players[2].hand)
+        AI_two_name = font.render(f"{game_manager.players[2].name}", True, (255,255,255))
+        screen.blit(AI_two_name, (500, 190))
 
+    if(game_manager.players[3]):
+        display_AI_cards(screen, 1060, 240, game_manager.players[3].hand)
+        AI_three_name = font.render(f"{game_manager.players[3].name}", True, (255,255,255))
+        screen.blit(AI_three_name, (1060, 400))
 
 #init logic
 pygame.init()
@@ -232,7 +246,7 @@ def run_poker_game(shared_queue):
                     game_manager.current_player.chips -= game_manager.current_bet
                     game_manager.raise_player_dict[game_manager.current_player.name] = False
                 elif(AI_Decision == "fold"):
-                    game_manager.players.remove(game_manager.current_player)
+                    game_manager.current_player.folded = True
                     game_manager.raise_player_dict[game_manager.current_player.name] = False
                 game_manager.next_turn()
                 pygame.display.flip()
@@ -242,21 +256,10 @@ def run_poker_game(shared_queue):
         if(game_manager.winner):
             win_text = font.render(f"Winner; {game_manager.winner}", True, (255,255,255))
             screen.blit(win_text, (195, 600))
-
-            display_AI_cards(screen, 30, 240, game_manager.players[1].hand)
-            AI_one_name = font.render(f"{game_manager.players[1].name}", True, (255,255,255))
-            screen.blit(AI_one_name, (30, 400))
-
-            display_AI_cards(screen, 500, 30, game_manager.players[2].hand)
-            AI_two_name = font.render(f"{game_manager.players[2].name}", True, (255,255,255))
-            screen.blit(AI_two_name, (500, 190))
-
-            display_AI_cards(screen, 1060, 240, game_manager.players[3].hand)
-            AI_three_name = font.render(f"{game_manager.players[3].name}", True, (255,255,255))
-            screen.blit(AI_three_name, (1060, 400))
+            win_condition(screen)
 
             pygame.display.flip()
-            time.sleep(60)
+            #time.sleep(60)
             
 
 

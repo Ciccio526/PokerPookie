@@ -62,8 +62,8 @@ class GameManager:
     def win(self):
         player_hand_strength_dict = {}
         for player in self.players:
-            if(isinstance(player) == HumanPlayer):
-                hand_strength = HSE.hand_strength_sim(HSE.convert_pokerkit_to_treys(player.hand))
+            if(isinstance(player, HumanPlayer)):
+                hand_strength = HSE.hand_strength_sim(HSE.convert_pokerkit_to_treys(player.hand), HSE.convert_pokerkit_to_treys(self.table_cards))
                 player_hand_strength_dict[player.name] = hand_strength
 
         if player_hand_strength_dict:
